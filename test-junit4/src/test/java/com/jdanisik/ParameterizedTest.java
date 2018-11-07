@@ -14,26 +14,27 @@ import org.junit.runners.Parameterized.Parameters;
 public class ParameterizedTest {
 
 	@Parameters
-  public static Collection<Object[]> data() {
-      return Arrays.asList(new Object[][] {
-              { 1, 1 }, { 2, 4 }
-      });
-  }
-	
-  private final int first;
-  private final int second;
+	public static Collection<Object[]> data() {
+		return Arrays.asList(new Object[][] {
+			{ 3, 9 }, 
+			{ 5, 25 }
+		});
+	}
 
-  public ParameterizedTest(
-    int first, 
-    int second
-  ) {
-    this.first = first;
-    this.second = second;
-  }
+	private final int input;
+	private final int expectedResult;
 
-  @Test
-  public void shouldReturnCorrectSum() {
-      assertEquals(second, first * first);
-  }
+	public ParameterizedTest(
+			int input, 
+			int expectedResult
+			) {
+		this.input = input;
+		this.expectedResult = expectedResult;
+	}
+
+	@Test
+	public void testPow() {
+		assertEquals(expectedResult, input * input);
+	}
 
 }
