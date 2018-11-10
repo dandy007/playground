@@ -34,7 +34,7 @@ public class ParameterizedTest {
 
 	@Test
 	public void testPow() {
-		assertEquals(expectedResult, input * input);
+		assertEquals(expectedResult, (int)Math.pow(input, 2));
 	}
 
 }
