@@ -8,7 +8,7 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.util.Base64;
 
-public class App
+public class Signing
 {
 
   public static KeyPair generateKeyPair() throws Exception {
