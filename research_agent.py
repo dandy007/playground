@@ -7,6 +7,9 @@ from urllib.parse import quote_plus
 
 BASE_DIR = os.path.dirname(__file__)
 
+from dotenv import load_dotenv
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
