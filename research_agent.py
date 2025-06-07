@@ -88,6 +88,7 @@ def fetch_page_text(url: str, limit: int = 5000) -> str:
 # ----------------------- OpenRouter LLM -----------------------
 
 def query_llm(messages, model="openrouter/auto"):
+
     """Call OpenRouter API with chat messages."""
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
@@ -122,6 +123,7 @@ def load_system_prompt(model: str) -> str:
 # ----------------------- Research agent logic -----------------------
 
 def iterative_research(prompt: str, rounds: int = 3, model: str = "openrouter/auto"):
+
     """Perform iterative research guided by an LLM."""
     history = []
     system_prompt = load_system_prompt(model)
@@ -154,6 +156,7 @@ def main():
     parser.add_argument("prompt", help="research goal prompt")
     parser.add_argument("--rounds", type=int, default=3, help="max research rounds")
     parser.add_argument("--model", default="openrouter/auto", help="LLM model to use")
+
     args = parser.parse_args()
 
     summary, history = iterative_research(args.prompt, rounds=args.rounds, model=args.model)
