@@ -14,6 +14,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 
@@ -25,7 +26,9 @@ def _create_driver() -> webdriver.Chrome:
     opts.add_argument("--headless=new")
     opts.add_argument("--disable-gpu")
     opts.add_argument("--no-sandbox")
-    return webdriver.Chrome(ChromeDriverManager().install(), options=opts)
+    driver_path = ChromeDriverManager().install()
+    service = Service(driver_path)
+    return webdriver.Chrome(service=service, options=opts)
 
 
 def google_search(query: str, limit: int = 5):
