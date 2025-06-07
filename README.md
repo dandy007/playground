@@ -5,20 +5,32 @@ using Google search in headless Chrome and an LLM accessed via OpenRouter.
 
 ## Setup
 
-1. Install dependencies:
+1. Create and activate a Python virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+2. Install dependencies inside the virtual environment:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Install Google Chrome or Chromium and ensure `chromedriver` is accessible on
+3. Create a `.env` file with your OpenRouter API key:
+
+```bash
+cp .env.example .env
+echo "OPENROUTER_API_KEY=YOUR_KEY" >> .env  # edit with your key
+```
+The script automatically loads variables from `.env`.
+
+4. Install Google Chrome or Chromium and ensure `chromedriver` is accessible on
 your PATH. The script uses `webdriver-manager` to download a matching driver
 when first executed.
+5. Optionally edit the system prompt for your chosen model in the
 
-3. Set the environment variable `OPENROUTER_API_KEY` with your OpenRouter API
-key.
-
-4. Optionally edit the system prompt for your chosen model in the
    `system_prompts/` directory. The default prompt for `openrouter/llama3-70b`
    is stored in `system_prompts/openrouter_llama3-70b.txt`.
 
