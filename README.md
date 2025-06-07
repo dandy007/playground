@@ -17,6 +17,7 @@ source .venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
 3. Create a `.env` file with your OpenRouter API key:
 
 ```bash
@@ -29,6 +30,7 @@ The script automatically loads variables from `.env`.
 your PATH. The script uses `webdriver-manager` to download a matching driver
 when first executed.
 5. Optionally edit the system prompt for your chosen model in the
+
    `system_prompts/` directory. The default prompt for `openrouter/llama3-70b`
    is stored in `system_prompts/openrouter_llama3-70b.txt`.
 
