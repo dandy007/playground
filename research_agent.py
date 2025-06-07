@@ -17,11 +17,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
+_driver = None  # global shared browser instance
+
 
 # ----------------------- Google search helpers -----------------------
 
-def _create_driver() -> webdriver.Chrome:
-    """Create headless Chrome driver."""
+def _init_driver() -> webdriver.Chrome:
+    """Initialize a headless Chrome driver."""
     opts = Options()
     opts.add_argument("--headless=new")
     opts.add_argument("--disable-gpu")
@@ -31,49 +33,59 @@ def _create_driver() -> webdriver.Chrome:
     return webdriver.Chrome(service=service, options=opts)
 
 
+def _get_driver() -> webdriver.Chrome:
+    """Return the shared driver instance, creating it if necessary."""
+    global _driver
+    if _driver is None:
+        _driver = _init_driver()
+    return _driver
+
+
+def close_driver():
+    """Close the shared driver if it exists."""
+    global _driver
+    if _driver is not None:
+        _driver.quit()
+        _driver = None
+
+
 def google_search(query: str, limit: int = 5):
     """Return a list of Google text search results."""
-    driver = _create_driver()
-    try:
-        driver.get(f"https://www.google.com/search?q={quote_plus(query)}")
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        out = []
-        for g in soup.select("div.g"):
-            title = g.find("h3")
-            link = g.find("a")
-            snippet = g.find("span", class_="aCOpRe")
-            if title and link:
-                out.append(
-                    {
-                        "title": title.get_text(),
-                        "link": link["href"],
-                        "snippet": snippet.get_text() if snippet else "",
-                    }
-                )
-            if len(out) >= limit:
-                break
+    driver = _get_driver()
+    driver.get(f"https://www.google.com/search?q={quote_plus(query)}")
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    out = []
+    for g in soup.select("div.g"):
+        title = g.find("h3")
+        link = g.find("a")
+        snippet = g.find("span", class_="aCOpRe")
+        if title and link:
+            out.append(
+                {
+                    "title": title.get_text(),
+                    "link": link["href"],
+                    "snippet": snippet.get_text() if snippet else "",
+                }
+            )
+        if len(out) >= limit:
+            break
         return out
-    finally:
-        driver.quit()
 
 
 def google_image_search(query: str, limit: int = 5):
     """Return a list of image urls and alt texts from Google image search."""
-    driver = _create_driver()
-    try:
-        driver.get(f"https://www.google.com/search?q={quote_plus(query)}&tbm=isch")
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        imgs = []
-        for img in soup.select("img"):
-            src = img.get("src")
-            alt = img.get("alt", "")
-            if src:
-                imgs.append({"src": src, "alt": alt})
-            if len(imgs) >= limit:
-                break
-        return imgs
-    finally:
-        driver.quit()
+    driver = _get_driver()
+    driver.get(f"https://www.google.com/search?q={quote_plus(query)}&tbm=isch")
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    imgs = []
+    for img in soup.select("img"):
+        src = img.get("src")
+        alt = img.get("alt", "")
+        if src:
+            imgs.append({"src": src, "alt": alt})
+        if len(imgs) >= limit:
+            break
+    return imgs
 
 
 def fetch_page_text(url: str, limit: int = 5000) -> str:
@@ -134,22 +146,24 @@ def iterative_research(prompt: str, rounds: int = 3, model: str = "openrouter/au
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": prompt},
     ]
-
-    for _ in range(rounds):
-        reply = query_llm(messages, model=model)
-        if reply.startswith("DONE:"):
-            return reply[len("DONE:") :].strip(), history
-        query = reply.strip()
-        text_results = google_search(query)
-        image_results = google_image_search(query)
-        # fetch text from first result for more context
-        if text_results:
-            text_results[0]["content"] = fetch_page_text(text_results[0]["link"])
-        history.append({"query": query, "texts": text_results, "images": image_results})
-        messages.append({"role": "assistant", "content": json.dumps(history)})
-    # final summary
-    final = query_llm(messages + [{"role": "assistant", "content": json.dumps(history)}], model=model)
-    return final, history
+    try:
+        for _ in range(rounds):
+            reply = query_llm(messages, model=model)
+            if reply.startswith("DONE:"):
+                return reply[len("DONE:") :].strip(), history
+            query = reply.strip()
+            text_results = google_search(query)
+            image_results = google_image_search(query)
+            # fetch text from first result for more context
+            if text_results:
+                text_results[0]["content"] = fetch_page_text(text_results[0]["link"])
+            history.append({"query": query, "texts": text_results, "images": image_results})
+            messages.append({"role": "assistant", "content": json.dumps(history)})
+        # final summary
+        final = query_llm(messages + [{"role": "assistant", "content": json.dumps(history)}], model=model)
+        return final, history
+    finally:
+        close_driver()
 
 
 # ----------------------- CLI -----------------------

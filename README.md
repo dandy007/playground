@@ -28,7 +28,8 @@ The script automatically loads variables from `.env`.
 
 4. Install Google Chrome or Chromium and ensure `chromedriver` is accessible on
 your PATH. The script uses `webdriver-manager` to download a matching driver
-when first executed.
+when first executed. A single headless Chrome instance is reused for all
+searches to avoid repeatedly starting new browser processes.
 5. Optionally edit the system prompt for your chosen model in the
 
    `system_prompts/` directory. The default prompt for `openrouter/auto`
