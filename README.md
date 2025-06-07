@@ -31,8 +31,8 @@ your PATH. The script uses `webdriver-manager` to download a matching driver
 when first executed.
 5. Optionally edit the system prompt for your chosen model in the
 
-   `system_prompts/` directory. The default prompt for `openrouter/llama3-70b`
-   is stored in `system_prompts/openrouter_llama3-70b.txt`.
+   `system_prompts/` directory. The default prompt for `openrouter/auto`
+   is stored in `system_prompts/openrouter_auto.txt`.
 
 ## Usage
 
@@ -40,7 +40,8 @@ Run the script with a research prompt:
 
 ```bash
 python research_agent.py "history of artificial intelligence" --rounds 3 \
-  --model openrouter/llama3-70b
+  --model openrouter/auto
+
 ```
 
 The agent will iteratively generate search queries, collect text and image
